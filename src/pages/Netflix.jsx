@@ -6,20 +6,27 @@ import { FaPlay } from "react-icons/fa";
 import { AiOutlineInfoCircle } from "react-icons/ai";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { getGenres } from "../store";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchMovies, getGenres } from "../store";
+import Slider from "../components/Slider";
 
 export default function Netflix() {
-  const navigate=useNavigate()
+  const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
-  const dispatch= useDispatch()
-  useEffect(()=>{
-    dispatch(getGenres())
-  },[])
+  const genresLoaded = useSelector((state) => state.netflix.genresLoaded);
+  const movies = useSelector((state) => state.netflix.movies);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(getGenres());
+  }, []);
+  useEffect(() => {
+    if (genresLoaded) dispatch(fetchMovies({ type: "all" }));
+  },[]);
   window.onscroll = () => {
     setIsScrolled(window.pageYOffset === 0 ? false : true);
     return () => (window.onscroll = null);
   };
+  console.log(movies,genresLoaded);
   return (
     <Container>
       <Navbar isScrolled={isScrolled} />
@@ -34,7 +41,10 @@ export default function Netflix() {
             <img src={MovieLogo} alt="Movie Logo" />
           </div>
           <div className="buttons flex">
-            <button className="flex j-center a-center" onClick={()=>navigate('/player')}>
+            <button
+              className="flex j-center a-center"
+              onClick={() => navigate("/player")}
+            >
               <FaPlay /> Play
             </button>
             <button className="flex j-center a-center">
@@ -43,6 +53,7 @@ export default function Netflix() {
           </div>
         </div>
       </div>
+      <Slider movies={movies}/>
     </Container>
   );
 }
